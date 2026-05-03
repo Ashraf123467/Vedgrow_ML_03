@@ -166,39 +166,26 @@ st.sidebar.markdown(
 # -------------------------------------------------
 if st.button("🔥 Recommend Movies"):
 
-    names, posters = recommend_movies(selected_movie)
+    recommendations = recommend_movies(selected_movie)
 
     st.markdown(f"""
-    <h2 style='text-align:center; margin-top:30px;'>
+    <h2 style='text-align:center; margin-top:30px; color:white;'>
     Top Recommendations for: {selected_movie}
     </h2>
     """, unsafe_allow_html=True)
 
     cols = st.columns(5)
 
-    for idx in range(5):
+    for idx, movie in enumerate(recommendations):
 
         with cols[idx]:
 
-            st.markdown('<div class="movie-card">', unsafe_allow_html=True)
-
-            st.image(posters[idx])
-
-            st.markdown(
-                f"<div class='movie-title'>{names[idx]}</div>",
-                unsafe_allow_html=True
-            )
-
-            st.markdown("</div>", unsafe_allow_html=True)
-
-    collaborative_scores = similarity_df[movie_name].sort_values(
-        ascending=False
-    )[1:n+1]
-
-    recommendations = collaborative_scores.index.tolist()
-
-    return recommendations
-
+            st.markdown(f"""
+            <div class="movie-card">
+                <h1>🎬</h1>
+                <div class="movie-title">{movie}</div>
+            </div>
+            """, unsafe_allow_html=True)
 # -------------------------------------------------
 # POPULAR MOVIES
 # -------------------------------------------------
