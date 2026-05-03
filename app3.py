@@ -122,18 +122,16 @@ similarity_df = pd.DataFrame(
 # -------------------------------------------------
 def recommend_movies(movie_name, n=5):
 
+    if movie_name not in similarity_df.columns:
+        return []
+
     collaborative_scores = similarity_df[movie_name].sort_values(
         ascending=False
     )[1:n+1]
 
     recommendations = collaborative_scores.index.tolist()
 
-    posters = []
-
-    for movie in recommendations:
-        posters.append(fetch_poster(movie))
-
-    return recommendations, posters
+    return recommendations
 
 # -------------------------------------------------
 # TITLE
