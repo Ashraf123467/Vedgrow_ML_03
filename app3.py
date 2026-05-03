@@ -84,6 +84,9 @@ section[data-testid="stSidebar"] {
 movies = pd.read_csv("movies.csv")
 ratings = pd.read_csv("ratings.csv")
 
+# Reduce dataset size for Streamlit stability
+ratings = ratings.head(20000)
+
 # -------------------------------------------------
 # MERGE DATA
 # -------------------------------------------------
@@ -97,6 +100,8 @@ user_movie_matrix = movie_data.pivot_table(
     columns='title',
     values='rating'
 )
+
+user_movie_matrix = user_movie_matrix.iloc[:, :500]
 
 user_movie_matrix = user_movie_matrix.fillna(0)
 
