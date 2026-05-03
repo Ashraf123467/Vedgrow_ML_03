@@ -127,7 +127,7 @@ def recommend_movies(movie_name, n=5):
 
     collaborative_scores = similarity_df[movie_name].sort_values(
         ascending=False
-    )[1:n+1]
+    )[2:n+2]
 
     recommendations = collaborative_scores.index.tolist()
 
