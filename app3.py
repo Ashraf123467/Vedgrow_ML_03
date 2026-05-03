@@ -1,0 +1,239 @@
+import streamlit as st
+import pandas as pd
+import requests
+from sklearn.metrics.pairwise import cosine_similarity
+
+# -------------------------------------------------
+# PAGE CONFIG
+# -------------------------------------------------
+st.set_page_config(
+    page_title="Netflix Style Movie Recommender",
+    page_icon="🎬",
+    layout="wide"
+)
+
+# -------------------------------------------------
+# CUSTOM CSS
+# -------------------------------------------------
+st.markdown("""
+<style>
+
+html, body, [class*="css"] {
+    background-color: #0b1120;
+    color: white;
+    font-family: sans-serif;
+}
+
+.title {
+    text-align:center;
+    font-size:60px;
+    font-weight:bold;
+    color:white;
+    margin-top:10px;
+}
+
+.subtitle {
+    text-align:center;
+    font-size:22px;
+    color:#cbd5e1;
+    margin-bottom:40px;
+}
+
+.movie-card {
+    background: linear-gradient(145deg,#111827,#1e293b);
+    padding:15px;
+    border-radius:18px;
+    text-align:center;
+    color:white;
+    transition:0.3s;
+    box-shadow:0px 6px 15px rgba(0,0,0,0.5);
+}
+
+.movie-card:hover {
+    transform: scale(1.03);
+}
+
+.movie-title {
+    font-size:18px;
+    font-weight:bold;
+    margin-top:10px;
+    color:white;
+}
+
+.stButton>button {
+    width:100%;
+    background: linear-gradient(135deg,#dc2626,#991b1b);
+    color:white;
+    border:none;
+    border-radius:12px;
+    height:55px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+section[data-testid="stSidebar"] {
+    background-color:#111827;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# -------------------------------------------------
+# LOAD DATA
+# -------------------------------------------------
+movies = pd.read_csv("movies.csv")
+ratings = pd.read_csv("ratings.csv")
+
+# -------------------------------------------------
+# MERGE DATA
+# -------------------------------------------------
+movie_data = ratings.merge(movies, on='movieId')
+
+# -------------------------------------------------
+# USER MOVIE MATRIX
+# -------------------------------------------------
+user_movie_matrix = movie_data.pivot_table(
+    index='userId',
+    columns='title',
+    values='rating'
+)
+
+user_movie_matrix = user_movie_matrix.fillna(0)
+
+# -------------------------------------------------
+# SIMILARITY MATRIX
+# -------------------------------------------------
+movie_similarity = cosine_similarity(user_movie_matrix.T)
+
+similarity_df = pd.DataFrame(
+    movie_similarity,
+    index=user_movie_matrix.columns,
+    columns=user_movie_matrix.columns
+)
+
+# -------------------------------------------------
+# FETCH MOVIE POSTER
+# -------------------------------------------------
+def fetch_poster(movie_name):
+
+    api_key = "YOUR_TMDB_API_KEY"
+
+    url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={movie_name}"
+
+    data = requests.get(url).json()
+
+    try:
+        poster_path = data['results'][0]['poster_path']
+
+        full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
+
+        return full_path
+
+    except:
+        return "https://via.placeholder.com/300x450?text=No+Image"
+
+# -------------------------------------------------
+# HYBRID RECOMMENDATION FUNCTION
+# -------------------------------------------------
+def recommend_movies(movie_name, n=5):
+
+    collaborative_scores = similarity_df[movie_name].sort_values(
+        ascending=False
+    )[1:n+1]
+
+    recommendations = collaborative_scores.index.tolist()
+
+    posters = []
+
+    for movie in recommendations:
+        posters.append(fetch_poster(movie))
+
+    return recommendations, posters
+
+# -------------------------------------------------
+# TITLE
+# -------------------------------------------------
+st.markdown(
+    '<div class="title">🎬 Movie Recommendation System</div>',
+    unsafe_allow_html=True
+)
+
+st.markdown(
+    '<div class="subtitle">Netflix-style AI Movie Recommendation Engine 🍿</div>',
+    unsafe_allow_html=True
+)
+
+# -------------------------------------------------
+# SIDEBAR
+# -------------------------------------------------
+st.sidebar.title("🎥 Movie Selection")
+
+movie_list = movies['title'].sort_values().unique()
+
+selected_movie = st.sidebar.selectbox(
+    "Choose Your Favorite Movie",
+    movie_list
+)
+
+st.sidebar.markdown("---")
+
+st.sidebar.markdown(
+    "🚀 Built using Collaborative Filtering + Cosine Similarity"
+)
+
+# -------------------------------------------------
+# RECOMMEND BUTTON
+# -------------------------------------------------
+if st.button("🔥 Recommend Movies"):
+
+    names, posters = recommend_movies(selected_movie)
+
+    st.markdown(f"""
+    <h2 style='text-align:center; margin-top:30px;'>
+    Top Recommendations for: {selected_movie}
+    </h2>
+    """, unsafe_allow_html=True)
+
+    cols = st.columns(5)
+
+    for idx in range(5):
+
+        with cols[idx]:
+
+            st.markdown('<div class="movie-card">', unsafe_allow_html=True)
+
+            st.image(posters[idx])
+
+            st.markdown(
+                f"<div class='movie-title'>{names[idx]}</div>",
+                unsafe_allow_html=True
+            )
+
+            st.markdown("</div>", unsafe_allow_html=True)
+
+# -------------------------------------------------
+# POPULAR MOVIES
+# -------------------------------------------------
+st.markdown("---")
+
+st.subheader("⭐ Most Popular Movies")
+
+top_movies = (
+    movie_data.groupby('title')['rating']
+    .count()
+    .sort_values(ascending=False)
+    .head(10)
+)
+
+st.bar_chart(top_movies)
+
+# -------------------------------------------------
+# FOOTER
+# -------------------------------------------------
+st.markdown("---")
+
+st.markdown("""
+<center style='color:gray;'>
+🚀 Developed by Ashraf Shikalgar
+</center>
+""", unsafe_allow_html=True)
