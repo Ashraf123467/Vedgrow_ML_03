@@ -153,7 +153,7 @@ st.markdown(
 # -------------------------------------------------
 st.sidebar.title("🎥 Movie Selection")
 
-movie_list = movies['title'].sort_values().unique()
+movie_list = similarity_df.columns
 
 selected_movie = st.sidebar.selectbox(
     "Choose Your Favorite Movie",
