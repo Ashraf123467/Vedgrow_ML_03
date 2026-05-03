@@ -118,19 +118,33 @@ def fetch_poster(movie_name):
 
     api_key = "YOUR_TMDB_API_KEY"
 
-    url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={movie_name}"
-
-    data = requests.get(url).json()
-
     try:
-        poster_path = data['results'][0]['poster_path']
 
-        full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
+        url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={movie_name}"
 
-        return full_path
+        response = requests.get(url)
+
+        data = response.json()
+
+        if (
+            'results' in data and
+            len(data['results']) > 0 and
+            data['results'][0]['poster_path']
+        ):
+
+            poster_path = data['results'][0]['poster_path']
+
+            full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
+
+            return full_path
+
+        else:
+
+            return "https://via.placeholder.com/300x450?text=No+Poster"
 
     except:
-        return "https://via.placeholder.com/300x450?text=No+Image"
+
+        return "https://via.placeholder.com/300x450?text=Error"
 
 # -------------------------------------------------
 # HYBRID RECOMMENDATION FUNCTION
