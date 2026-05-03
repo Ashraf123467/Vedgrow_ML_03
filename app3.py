@@ -111,40 +111,6 @@ similarity_df = pd.DataFrame(
     columns=user_movie_matrix.columns
 )
 
-# -------------------------------------------------
-# FETCH MOVIE POSTER
-# -------------------------------------------------
-def fetch_poster(movie_name):
-
-    api_key = "YOUR_TMDB_API_KEY"
-
-    try:
-
-        url = f"https://api.themoviedb.org/3/search/movie?api_key={api_key}&query={movie_name}"
-
-        response = requests.get(url)
-
-        data = response.json()
-
-        if (
-            'results' in data and
-            len(data['results']) > 0 and
-            data['results'][0]['poster_path']
-        ):
-
-            poster_path = data['results'][0]['poster_path']
-
-            full_path = "https://image.tmdb.org/t/p/w500/" + poster_path
-
-            return full_path
-
-        else:
-
-            return "https://via.placeholder.com/300x450?text=No+Poster"
-
-    except:
-
-        return "https://via.placeholder.com/300x450?text=Error"
 
 # -------------------------------------------------
 # HYBRID RECOMMENDATION FUNCTION
@@ -224,6 +190,14 @@ if st.button("🔥 Recommend Movies"):
             )
 
             st.markdown("</div>", unsafe_allow_html=True)
+
+    collaborative_scores = similarity_df[movie_name].sort_values(
+        ascending=False
+    )[1:n+1]
+
+    recommendations = collaborative_scores.index.tolist()
+
+    return recommendations
 
 # -------------------------------------------------
 # POPULAR MOVIES
