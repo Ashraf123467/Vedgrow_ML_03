@@ -26,7 +26,7 @@ html, body, [class*="css"] {
 /* Main Title */
 .title {
     text-align: center;
-    font-size: 70px;
+    font-size: 55px;
     font-weight: 800;
     color: inherit ;
     margin-top: 20px;
