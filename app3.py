@@ -16,7 +16,7 @@ st.set_page_config(
 # CUSTOM CSS
 # -------------------------------------------------
 st.markdown("""
-<<style>
+<style>
 
 /* Main Background */
 .stApp {
