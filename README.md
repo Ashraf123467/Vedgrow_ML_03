@@ -10,6 +10,8 @@ The system recommends movies to users based on:
 
 The project uses the **MovieLens 100K Dataset** and demonstrates how recommendation engines used in platforms like Netflix and Amazon work.
 
+live Demo : https://vedgrowml03.streamlit.app/
+
 ---
 
 # 🚀 Features
